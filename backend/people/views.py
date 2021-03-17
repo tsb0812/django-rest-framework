@@ -1,47 +1,50 @@
-from django.http import HttpResponse, JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from rest_framework.parsers import JSONParser
+from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.decorators import api_view
 from .models import People
 from .serializers import PeopleSerializer
 
 # We will be using @csrf_exempt decorator as we want to POST to this view from client that does not have CSRF token
 
+# @api_view decorator for working with function bases views
+# APIView class for working with class based views
 
-@csrf_exempt
-def people_list(request):
+
+@api_view(['GET', 'POST'])
+# Allow only GET and POST request for this view function
+def people_list(request, format=None):
     if request.method == 'GET':
         people = People.objects.all()
         serializer = PeopleSerializer(people, many=True)
-        return JsonResponse(serializer.data, safe=False)
+        return Response(serializer.data)
 
     elif request.method == 'POST':
-        data = JSONParser().parse(request)
-        serializer = PeopleSerializer(data=data)
+        serializer = PeopleSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return JsonResponse(serializer.data, status=201)
-        return JsonResponse(serializer.errors, status=400)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-@csrf_exempt
-def people_detail(request, pk):
+@api_view(['GET', 'PUT', 'DELETE'])
+# Allow only GET, PUT and DELETE for this view function
+def people_detail(request, pk, format=None):
     try:
         people = People.objects.get(pk=pk)
     except People.DoesNotExist:
-        return HttpResponse(status=404)
+        return Response(status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
         serializer = PeopleSerializer(people)
-        return JsonResponse(serializer.data)
+        return Response(serializer.data)
 
     elif request.method == 'PUT':
-        data = JSONParser().parse(request)
-        serializer = PeopleSerializer(people, data=data)
+        serializer = PeopleSerializer(people, data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return JsonResponse(serializer.data)
-        return JsonResponse(serializer.errors, status=400)
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     elif request.method == 'DELETE':
         people.delete()
-        return HttpResponse(status=204)
+        return Response(status=status.HTTP_204_NO_CONTENT)
