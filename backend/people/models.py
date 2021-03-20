@@ -16,6 +16,10 @@ class People(models.Model):
     school = models.CharField(max_length=100)
     bio = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
+    account = models.ForeignKey('auth.User', related_name='people', on_delete=models.CASCADE)
 
     class Meta:
         ordering = ['created_at']
+    
+    def save(self, *args, **kwargs):
+        super(People, self).save(*args, **kwargs)

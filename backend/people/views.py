@@ -1,7 +1,8 @@
 # USING GENERIC CLASS-BASED VIEWS
 
 from .models import People
-from .serializers import PeopleSerializer
+from django.contrib.auth.models import User
+from .serializers import PeopleSerializer, UserSerializer
 from rest_framework import generics
 
 
@@ -9,10 +10,24 @@ class PeopleList(generics.ListCreateAPIView):
     queryset = People.objects.all()
     serializer_class = PeopleSerializer
 
+    def perform_create(self, serializer):
+        serializer.save(account=self.request.user)
+
 
 class PeopleDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = People.objects.all()
     serializer_class = PeopleSerializer
+
+
+# User views
+class UserList(generics.ListAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+
+class UserDetail(generics.RetrieveAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
 
 
 # USING MIXINS

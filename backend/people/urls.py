@@ -11,7 +11,9 @@ from . import views
 
 urlpatterns = [
     path('people/', views.PeopleList.as_view()),
-    path('people/<int:pk>/', views.PeopleDetail.as_view())
+    path('people/<int:pk>/', views.PeopleDetail.as_view()),
+    path('users/', views.UserList.as_view()),
+    path('users/<int:pk>/', views.UserDetail.as_view())
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)
