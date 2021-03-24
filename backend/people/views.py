@@ -3,12 +3,16 @@
 from .models import People
 from django.contrib.auth.models import User
 from .serializers import PeopleSerializer, UserSerializer
-from rest_framework import generics
+from rest_framework import generics, permissions
+from people.permissions import IsOwnerOrReadOnly
+
+# permission_classes helps us to ensure that only authenticated users can create, update or delete the data
 
 
 class PeopleList(generics.ListCreateAPIView):
     queryset = People.objects.all()
     serializer_class = PeopleSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
 
     def perform_create(self, serializer):
         serializer.save(account=self.request.user)
@@ -17,6 +21,7 @@ class PeopleList(generics.ListCreateAPIView):
 class PeopleDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = People.objects.all()
     serializer_class = PeopleSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
 
 
 # User views
